@@ -80,7 +80,13 @@ def impute_with_knn(df, columns_to_impute, n_neighbors=5):
     Returns:
         pd.DataFrame: DataFrame with missing values imputed.
     """
+    # imputer = KNNImputer(n_neighbors=n_neighbors)
+    # data_imputed = imputer.fit_transform(df[columns_to_impute])
+    # df[columns_to_impute] = pd.DataFrame(data_imputed, columns=df.columns)[columns_to_impute]
+
+    # imputer = KNNImputer(n_neighbors=n_neighbors)
+    # df[columns_to_impute] = imputer.fit_transform(df[columns_to_impute])
     imputer = KNNImputer(n_neighbors=n_neighbors)
-    data_imputed = imputer.fit_transform(df)
-    df[columns_to_impute] = pd.DataFrame(data_imputed, columns=df.columns)[columns_to_impute]
-    return df
+    df_imputed = imputer.fit_transform(df)
+    df_imputed = pd.DataFrame(df_imputed, columns=df.columns)
+    return df_imputed
