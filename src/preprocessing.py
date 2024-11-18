@@ -1,4 +1,6 @@
+import numpy as np
 import pandas as pd
+from lightgbm import LGBMRegressor, LGBMClassifier
 from sklearn.impute import KNNImputer
 
 
@@ -86,3 +88,38 @@ def impute_with_knn(df, n_neighbors=5):
     return df_imputed
 
 
+def splits_creation(data,col):
+    train = data[data['is_nan'] == 0]
+    test = data[data['is_nan'] == 1]
+    X_train = train.drop([col,"is_nan"], axis=1)
+    y_train = train[col]
+    X_test = test.drop([col,"is_nan"], axis=1)
+    return X_train, y_train, X_test
+
+def factorize_categoricals(df):
+    for cat_col in df.select_dtypes(include='object'):
+        df[cat_col] = pd.factorize(df[cat_col])
+    return df
+
+def train_predict(mode, X_train, y_train, X_test):
+    if mode == "regression":
+        model = LGBMRegressor()
+    else:
+        model = LGBMClassifier()
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
+    return y_pred
+
+def impute_missing_values(data, cols_list, mode):
+    for col in cols_list:
+        df = data.copy()
+        nan_ixs = np.where(data[col].isna())[0]
+        data['is_nan'] = 0
+        data.loc[nan_ixs, 'is_nan'] = 1
+        X = data.drop([col], axis=1)
+        y = data[col]
+        X = factorize_categoricals(X)
+        X_train, y_train, X_test = splits_creation(data,col)
+        y_pred = train_predict(mode, X_train, y_train, X_test)
+        df.loc[nan_ixs, col] = y_pred
+    return df
