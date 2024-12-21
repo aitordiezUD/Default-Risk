@@ -17,6 +17,8 @@ print(f"Shape of the dataframe: {df.shape}")
 # pca = PCA(n_components=2)  # Adjust this number to reduce dimensionality
 # df_scaled_reduced = pca.fit_transform(df_scaled)
 df_scaled_reduced = df_scaled
+
+df_scaled_reduced.astype(np.float32)
 def objective(trial):
     # Sugerir valores para los hiperparámetros de BIRCH
     threshold = trial.suggest_float('threshold', 0.01, 1.0)  # Umbral para la construcción del árbol
